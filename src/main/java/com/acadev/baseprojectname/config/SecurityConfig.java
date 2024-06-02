@@ -35,30 +35,29 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
 		return http
-		.cors(AbstractHttpConfigurer::disable)
+		.cors().and()
 		.csrf(AbstractHttpConfigurer::disable)
 		.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-	//	        Set permissions on endpoints
 		.authorizeHttpRequests(auth -> auth
-	//	            our public endpoints
+		// Permitir solicitudes publicas
 		.requestMatchers(HttpMethod.POST, "/api/auth/signup/**").permitAll()
 		.requestMatchers(HttpMethod.POST, "/api/auth/signin/**").permitAll()
 		.requestMatchers(HttpMethod.GET, "/api-docs/**").permitAll()
 		.requestMatchers(HttpMethod.GET, "/swagger-ui/**").permitAll()
 		.requestMatchers(HttpMethod.GET, "/actuator/**").permitAll()
 		.requestMatchers(HttpMethod.GET, "/api/**").permitAll()
-	//	            our private endpoints
+        // Permitir solicitudes OPTIONS
+        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+        // Privar todas las demás solicitudes
 		.anyRequest().authenticated()
 		)
 		.authenticationManager(authenticationManager)
-
-//      Add JWT token filter
-      .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+		.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
 		.build();
 	}
 
-	@Bean
-	public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+    @Bean
+    AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
 		AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
 		authenticationManagerBuilder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
 		return authenticationManagerBuilder.build();

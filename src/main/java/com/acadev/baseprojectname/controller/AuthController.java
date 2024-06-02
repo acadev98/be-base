@@ -3,6 +3,7 @@ package com.acadev.baseprojectname.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,6 +31,11 @@ public class AuthController {
 	@PostMapping("/signin")
 	public ResponseEntity<Object> signin(@RequestBody SignInRequest request) {
 		return ResponseHandler.generateResponse(MessagesUtils.USER_LOGED, HttpStatus.OK, service.signin(request));
+	}
+	
+	@GetMapping("/userinfo")
+	public ResponseEntity<Object> userinfo() {
+		return ResponseHandler.generateResponse(MessagesUtils.USER_INFORMATION, HttpStatus.OK, service.userinfo());
 	}
 
 }

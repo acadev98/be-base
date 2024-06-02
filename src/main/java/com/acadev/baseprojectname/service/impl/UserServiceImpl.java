@@ -5,6 +5,9 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +18,7 @@ import com.acadev.baseprojectname.handler.exception.ApiException;
 import com.acadev.baseprojectname.model.request.SignInRequest;
 import com.acadev.baseprojectname.model.request.SignUpRequest;
 import com.acadev.baseprojectname.model.response.SignInResponse;
+import com.acadev.baseprojectname.model.response.UserInfoResponse;
 import com.acadev.baseprojectname.service.UserService;
 import com.acadev.baseprojectname.utils.JwtHelper;
 import com.acadev.baseprojectname.utils.enums.ApiMessage;
@@ -47,6 +51,8 @@ public class UserServiceImpl implements UserService {
 		
 		Users user = Users.builder()
 				.name(request.getName())
+				.lastname(request.getLastname())
+				.username(request.getUsername())
 				.mail(request.getMail())
 				.password(hashedPassword)
 				.build();
@@ -63,7 +69,30 @@ public class UserServiceImpl implements UserService {
 	    }
 		
 		String token = JwtHelper.generateToken(request.getMail());
-		return SignInResponse.builder().mail(request.getMail()).token(token).build();
+		return SignInResponse.builder().email(request.getMail()).token(token).build();
+	}
+
+	public UserInfoResponse userinfo() {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Optional<Users> existingUser = repository.findByMail(userDetails.getUsername());
+		
+		if (existingUser.isEmpty()) {
+			throw new ApiException(ApiMessage.CONTENT_NOT_FOUND);
+		} else {
+			Users user = existingUser.get();
+			
+			UserInfoResponse response = UserInfoResponse.builder()
+				.name(user.getName())
+				.lastname(user.getLastname())
+				.username(user.getUsername())
+				.email(user.getMail())
+				.build();
+
+	        return response;
+		}
+        
 	}
 	
 }

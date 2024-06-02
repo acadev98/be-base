@@ -4,6 +4,7 @@ public class MessagesUtils {
 
 	/** auth */
 	public static final String USER_LOGED = "Usuario logeado.";
+	public static final String USER_INFORMATION = "Información de usuario.";
 	public static final String USER_CREATED = "Usuario creado.";
 	
 	/** products */
